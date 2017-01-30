@@ -5,14 +5,14 @@ public class Liquid {
 
 	// Max and min cell liquid values
 	float MaxValue = 1.0f;
-	float MinValue = 0.001f;
+	float MinValue = 0.005f;
 
 	// Extra liquid a cell can store than the cell above it
 	float MaxCompression = 0.25f;
 
 	// Lowest and highest amount of liquids allowed to flow per iteration
-	float MinFlow = 0.05f;
-	float MaxFlow = 1f;
+	float MinFlow = 0.005f;
+	float MaxFlow = 4f;
 
 	// Adjusts flow speed (0.0f - 1.0f)
 	float FlowSpeed = 1f;
@@ -39,18 +39,6 @@ public class Liquid {
 		}
 
 		return value;
-	}
-
-	// Check if cell contains min required liquid value.  If not clear it.
-	float LiquidRemaining(Cell cell, float remainingValue)
-	{
-		// Cell has less than min value allowed
-		if (remainingValue < MinValue) {
-			remainingValue = 0;
-			cell.Settled = false;
-			return remainingValue;
-		} else
-			return remainingValue;
 	}
 
 	// Run one simulation step
@@ -82,8 +70,10 @@ public class Liquid {
 					continue;
 				if (cell.Settled) 
 					continue;
-				if (LiquidRemaining (cell, cell.Liquid) == 0)
+				if (cell.Liquid < MinValue) {
+					cell.Liquid = 0;
 					continue;
+				}
 
 				// Keep track of how much liquid this cell started off with
 				float startValue = cell.Liquid;
@@ -114,7 +104,8 @@ public class Liquid {
 				}
 
 				// Check to ensure we still have liquid in this cell
-				if (LiquidRemaining (cell, remainingValue) == 0) {
+				if (remainingValue < MinValue) {
+					Diffs [x, y] -= remainingValue;
 					continue;
 				}
 
@@ -142,7 +133,8 @@ public class Liquid {
 				}
 
 				// Check to ensure we still have liquid in this cell
-				if (LiquidRemaining (cell, remainingValue) == 0) {
+				if (remainingValue < MinValue) {
+					Diffs [x, y] -= remainingValue;
 					continue;
 				}
 				
@@ -170,7 +162,8 @@ public class Liquid {
 				}
 
 				// Check to ensure we still have liquid in this cell
-				if (LiquidRemaining (cell, remainingValue) == 0) {
+				if (remainingValue < MinValue) {
+					Diffs [x, y] -= remainingValue;
 					continue;
 				}
 				
@@ -197,7 +190,8 @@ public class Liquid {
 				}
 
 				// Check to ensure we still have liquid in this cell
-				if (LiquidRemaining (cell, remainingValue) == 0) {
+				if (remainingValue < MinValue) {
+					Diffs [x, y] -= remainingValue;
 					continue;
 				}
 
@@ -217,8 +211,11 @@ public class Liquid {
 		// Update Cell values
 		for (int x = 0; x < cells.GetLength (0); x++) {
 			for (int y = 0; y < cells.GetLength (1); y++) {
-				if (Diffs[x,y] != 0)
-					cells [x, y].Liquid += Diffs [x, y];
+				cells [x, y].Liquid += Diffs [x, y];
+				if (cells [x, y].Liquid < MinValue) {
+					cells [x, y].Liquid = 0;
+					cells [x, y].Settled = false;	//default empty cell to unsettled
+				}				
 			}
 		}			
 	}

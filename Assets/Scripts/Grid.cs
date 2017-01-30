@@ -36,9 +36,14 @@ public class Grid : MonoBehaviour {
 	Liquid LiquidSimulator;
 	Sprite[] LiquidFlowSprites;
 
+	GameObject View;
+
 	bool Fill;
 
 	void Awake() {
+
+		// Camera view
+		View = GameObject.Find ("View").gameObject;
 
 		// Load some sprites to show the liquid flow directions
 		LiquidFlowSprites = Resources.LoadAll <Sprite>("LiquidFlowSprites");
@@ -128,6 +133,11 @@ public class Grid : MonoBehaviour {
 
 			}
 		}
+
+		// Fit camera to grid
+		View.transform.position = this.transform.position + new Vector3(HorizontalLines [0].transform.localScale.x/2f, -VerticalLines [0].transform.localScale.y/2f);
+		View.transform.localScale = new Vector2 (HorizontalLines [0].transform.localScale.x, VerticalLines [0].transform.localScale.y);
+		Camera.main.GetComponent<Camera2D> ().Set ();
 	}
 
 	// Sets neighboring cell references
